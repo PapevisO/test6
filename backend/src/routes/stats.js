@@ -2,18 +2,16 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const router = express.Router();
+const cache = require('../services/cache');
 const DATA_PATH = path.join(__dirname, '../../../data/items.json');
-
-let cachedStats = null;
-let cachedMtime = 0;
 
 // GET /api/stats
 router.get('/', async (req, res, next) => {
   try {
       const fileStat = await fs.promises.stat(DATA_PATH);
-
-      if (cachedStats && cachedMtime === fileStat.mtimeMs) {
-        return res.json(cachedStats);
+      const cached = cache.getCachedStats(fileStat.mtimeMs);
+      if (cached) {
+        return res.json(cached);
       }
 
       const raw = await fs.promises.readFile(DATA_PATH, 'utf8');
@@ -22,8 +20,7 @@ router.get('/', async (req, res, next) => {
         total: items.length,
         averagePrice: items.length ? items.reduce((acc, cur) => acc + cur.price, 0) / items.length : 0
       };
-      cachedStats = statsData;
-      cachedMtime = fileStat.mtimeMs;
+      cache.setCachedStats(fileStat.mtimeMs, statsData);
 
       return res.json(statsData);
     } catch (err) {
@@ -31,9 +28,6 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.resetCache = () => {
-  cachedStats = null;
-  cachedMtime = 0;
-};
+router.resetCache = cache.resetCache;
 
 module.exports = router;
