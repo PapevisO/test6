@@ -24,3 +24,15 @@ describe('GET /api/items', () => {
     });
   });
 });
+
+describe('POST /api/items', () => {
+  it('should create a new item', async () => {
+    const newItem = { name: 'New Test Item', price: 20 };
+    const res = await request(app).post('/api/items').send(newItem);
+    expect(res.statusCode).toBe(201);
+    expect(res.body.name).toBe(newItem.name);
+    expect(res.body.price).toBe(newItem.price);
+    expect(res.body).toHaveProperty('id');
+  });
+});
+
