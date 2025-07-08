@@ -35,4 +35,13 @@ describe('POST /api/items', () => {
     expect(res.body.price).toBe(newItem.price);
     expect(res.body).toHaveProperty('id');
   });
+
+  it('should throw invalid item', async () => {
+    const newItem = { name: '', price: '20' };
+    const res = await request(app).post('/api/items').send(newItem);
+    expect(res.statusCode).toBe(422);
+    expect(res.text).toContain('Invalid item');
+    expect(res.text).toContain('must be a non-empty string');
+    expect(res.text).toContain('must be a positive number');
+  });
 });
