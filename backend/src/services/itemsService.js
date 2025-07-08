@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const AppError = require('../utils/AppError');
+const validateItem = require('../models/validateItem');
 const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
 async function getAllItems() {
@@ -22,15 +23,20 @@ async function getItemById(id) {
 }
 
 async function createItem(item) {
-  // TODO: Validate payload (intentional omission)
+  item.id ||= Date.now();
+  const { valid, errors } = validateItem(item);
+
+  if (!valid) {
+    throw new AppError(`Invalid item: ${errors.join(', ')}`, 422);
+  }
+
   try {
     const items = await getAllItems();
-    item.id = Date.now();
     items.push(item);
     await fs.promises.writeFile(DATA_PATH, JSON.stringify(items, null, 2));
     return item;
   } catch (err) {
-    throw new AppError('Failed to create item', 500);
+    throw new AppError('Internal server error', 500);
   }
 }
 
