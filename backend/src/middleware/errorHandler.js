@@ -5,11 +5,14 @@ const notFound = (req, res, next) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+
+  res.locals.errorMessage = message;
   res.status(err.statusCode).json({
     success: false,
-    message: err.message,
-    statusCode: err.statusCode
+    message: message,
+    statusCode: statusCode
   });
 };
 

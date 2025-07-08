@@ -28,6 +28,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const item = await itemsService.getItemById(req.params.id);
+
     res.json(item);
   } catch (err) {
     next(err);
@@ -38,6 +39,7 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const newItem = await itemsService.createItem(req.body);
+
     res.status(201).json(newItem);
   } catch (err) {
     next(err);
