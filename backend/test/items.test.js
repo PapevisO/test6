@@ -15,12 +15,13 @@ describe('GET /api/items', () => {
   });
 
   it('should return filtered items when using query "q"', async () => {
-    // This test assumes that at least one item contains the string 'test' in its name (case-insensitive)
-    const res = await request(app).get('/api/items?q=test');
+    // This laptop assumes that at least one item contains the string 'laptop' in its name (case-insensitive)
+    const res = await request(app).get('/api/items?q=laptop');
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(1);
     res.body.forEach(item => {
-      expect(item.name.toLowerCase()).toContain('test');
+      expect(item.name.toLowerCase()).toContain('laptop');
     });
   });
 });
