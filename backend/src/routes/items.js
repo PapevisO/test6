@@ -1,21 +1,13 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, '../../../data/items.json');
-
-// Utility to read data using asynchronous, non-blocking I/O
-const readData = async () => {
-  const raw = await fs.promises.readFile(DATA_PATH, 'utf8');
-  return JSON.parse(raw);
-}
+const itemsService = require('../services/itemsService');
 
 // GET /api/items
 router.get('/', async (req, res, next) => {
   try {
-    const data = await readData();
+    let items = await itemsService.getAllItems();
     const { limit, q } = req.query;
-    let results = data;
+    let results = items;
 
     if (q) {
       // Simple substring search (sub‑optimal)
@@ -35,13 +27,7 @@ router.get('/', async (req, res, next) => {
 // GET /api/items/:id
 router.get('/:id', async (req, res, next) => {
   try {
-    const data = await readData();
-    const item = data.find(i => i.id === parseInt(req.params.id));
-    if (!item) {
-      const err = new Error('Item not found');
-      err.status = 404;
-      throw err;
-    }
+    const item = await itemsService.getItemById(req.params.id);
     res.json(item);
   } catch (err) {
     next(err);
@@ -51,13 +37,8 @@ router.get('/:id', async (req, res, next) => {
 // POST /api/items
 router.post('/', async (req, res, next) => {
   try {
-    // TODO: Validate payload (intentional omission)
-    const item = req.body;
-    const data = await readData();
-    item.id = Date.now();
-    data.push(item);
-    await fs.promises.writeFile(DATA_PATH, JSON.stringify(data, null, 2));
-    res.status(201).json(item);
+    const newItem = await itemsService.createItem(req.body);
+    res.status(201).json(newItem);
   } catch (err) {
     next(err);
   }
