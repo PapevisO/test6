@@ -35,4 +35,3 @@ describe('POST /api/items', () => {
     expect(res.body).toHaveProperty('id');
   });
 });
-
