@@ -1,22 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const itemsService = require('../services/itemsService');
+const filterItems = require('../models/filterItems');
 
 // GET /api/items
 router.get('/', async (req, res, next) => {
   try {
-    let items = await itemsService.getAllItems();
-    const { limit, q } = req.query;
-    let results = items;
-
-    if (q) {
-      // Simple substring search (sub‑optimal)
-      results = results.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
-    }
-
-    if (limit) {
-      results = results.slice(0, parseInt(limit));
-    }
+    const allItems = await itemsService.getAllItems();
+    const results = filterItems(allItems, req.query);
 
     res.json(results);
   } catch (err) {
